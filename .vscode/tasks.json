@@ -1,0 +1,37 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "Build OpenGL Project",
+            "command": "C:\\msys64\\mingw32\\bin\\g++.exe",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-g",
+                "${workspaceFolder}/src/main.cpp",
+                "${workspaceFolder}/src/glad.c",
+                "-o",
+                "${workspaceFolder}/main.exe",
+                "-I${workspaceFolder}/include",
+                "-L${workspaceFolder}/lib",
+                "-lglfw3",
+                "-lgdi32",
+                "-lopengl32"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "PATH": "C:\\msys64\\mingw32\\bin;${env:PATH}"
+                }
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Custom task for compiling OpenGL with GLFW and GLAD"
+        }
+    ]
+}
