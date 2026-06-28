@@ -1,10 +1,43 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <string>
+#include <fstream>
+#include <sstream>
 
 // void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 //     glViewport(0, 0, width, height);
 // }
+struct ShaderProgramSource {
+    std::string VertexSource;
+    std::string FragmentSource;
+};
+
+ShaderProgramSource ParseShader(std::string filePath){
+    std::ifstream stream(filePath);
+
+    enum class ShaderType {
+        NONE = -1, VERTEX = 0, FRAGMENT = 1
+    };
+
+    std::string line;
+    std::stringstream ss[2];
+    ShaderType shaderType = ShaderType::NONE;
+
+    while (std::getline(stream, line)) {
+        if (line.find("#shader") != std::string::npos) {
+            if(line.find("vertex") != std::string::npos) {
+                shaderType = ShaderType::VERTEX;
+            } else if (line.find("fragment") != std::string::npos) {
+                shaderType = ShaderType::FRAGMENT;
+            }
+        }
+        else{
+            ss[(int)shaderType] << line << '\n';
+        }
+    }
+    return { ss[0].str(), ss[1].str() };
+}
 
 unsigned int CompileShader(const int type, const std::string& source){
     unsigned int id = glCreateShader(type);
@@ -87,22 +120,11 @@ int main() {
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    const std::string vertexShaderSource = R"(
-        #version 330 core
-        layout(location = 0) in vec4 positon;
-        void main() {
-            gl_Position = positon;
-        }
-    )";
+    ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
+    std::cout << "Vertex Shader Source:\n" << source.VertexSource << std::endl;
+    std::cout << "Fragment Shader Source:\n" << source.FragmentSource << std::endl;
 
-    const std::string fragmentShaderSource = R"(
-        #version 330 core
-        out vec4 color;
-        void main() {
-            color = vec4(1.0, 0.5, 0.2, 1.0);
-        }
-    )";
-    unsigned int shader = CreateShader(vertexShaderSource, fragmentShaderSource);
+    unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
 
     // Render loop
     while (!glfwWindowShouldClose(window)) {
