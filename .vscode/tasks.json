@@ -8,7 +8,7 @@
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
-                "${workspaceFolder}/src/main.cpp",
+                "${workspaceFolder}/src/*.cpp",
                 "${workspaceFolder}/src/glad.c",
                 "-o",
                 "${workspaceFolder}/main.exe",
@@ -21,7 +21,6 @@
             "options": {
                 "cwd": "${workspaceFolder}",
                 "env": {
-                    
                     "PATH": "C:\\msys64\\mingw32\\bin;${env:PATH}"
                 }
             },

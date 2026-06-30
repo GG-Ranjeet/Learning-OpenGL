@@ -1,2 +1,4 @@
 src/_yo.cpp
 *.exe
+include/*
+lib/*
