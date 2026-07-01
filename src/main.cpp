@@ -10,6 +10,7 @@
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "shader.h"
+#include "VertexBufferLayout.h"
 
 int main()
 {
@@ -76,9 +77,10 @@ int main()
         vbo.Unbind();
         ibo.Unbind();
 
+        Renderer renderer;
+
         float r = 0.0f;
-        float increment = 0.05f;
-        
+        float increment = 0.05f;        
 
         // Render loop
         while (!glfwWindowShouldClose(window))
@@ -86,6 +88,8 @@ int main()
             // Input handling
             if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
                 glfwSetWindowShouldClose(window, true);
+            glClearColor(0.1f, 0.3f, 0.3f, 1.0f);
+            renderer.Clear();          
 
             float currentLoopTime = (float)glfwGetTime();
 
@@ -93,22 +97,12 @@ int main()
             float greenValue = (std::cos(currentLoopTime * 1.5f) / 2.0f) + 0.5f;
             float blueValue  = (std::sin(currentLoopTime * 2.0f) / 2.0f) + 0.5f;
 
-            shader.Bind();
             shader.SetUniform4f("u_Color", redValue, greenValue, blueValue, 1.0f);
-            ibo.Bind();
-            vao.Bind();
-
-            // Rendering commands (Dark Teal Background)
-            glClearColor(0.1f, 0.3f, 0.3f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
-
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-
-            // Swap buffers and poll IO events
+            renderer.Draw(vao, ibo, shader);
+            
             glfwSwapBuffers(window);
             glfwPollEvents();
         }
-        shader.~Shader();
     }
     glfwTerminate();
 
