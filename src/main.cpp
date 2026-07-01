@@ -5,7 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
-
+#include "VertexArray.h"
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
@@ -128,38 +128,30 @@ int main()
 
     {
         float vertices[] = {
-            -0.5f,
-            -0.5f,
-            0.5f,
-            -0.5f,
-            0.5f,
-            0.5f,
-            -0.5f,
-            0.5f,
+            -0.5f, -0.5f,
+             0.5f, -0.5f, 
+             0.5f,  0.5f, 
+            -0.5f,  0.5f,
         };
         unsigned int indices[] = {
             0, 1, 2,
             2, 3, 0};
 
-        unsigned int vao;
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
-
+        VertexArray vao;
+        VertexBufferLayout layout;
+        layout.Push<float>(2);
+        
         VertexBuffer vbo(vertices, sizeof(vertices));
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
-        glEnableVertexAttribArray(0);
+        vao.AddBuffer(vbo, layout);
 
         IndexBuffer ibo(indices, sizeof(indices) / sizeof(unsigned int));
 
         ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
-        std::cout << "Vertex Shader Source:\n"
-                  << source.VertexSource << std::endl;
-        std::cout << "Fragment Shader Source:\n"
-                  << source.FragmentSource << std::endl;
 
         unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
         glUseProgram(shader);
-
+        
+        vao.Unbind();
         glUseProgram(0);
         glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -168,7 +160,7 @@ int main()
         int location = glGetUniformLocation(shader, "u_Color");
         float r = 0.0f;
         float increment = 0.05f;
-        float timeValue = glfwGetTime();
+        
 
         // Render loop
         while (!glfwWindowShouldClose(window))
@@ -178,10 +170,11 @@ int main()
                 glfwSetWindowShouldClose(window, true);
 
             glUseProgram(shader);
-            timeValue = glfwGetTime();
-            float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-            float redValue = (cos(timeValue) / 2.0f) + 0.5f;
-            float blueValue = (cos(timeValue) / 2.0f) + 0.5f;
+            float currentLoopTime = (float)glfwGetTime();
+
+            float redValue   = (std::sin(currentLoopTime * 1.0f) / 2.0f) + 0.5f;
+            float greenValue = (std::cos(currentLoopTime * 1.5f) / 2.0f) + 0.5f;
+            float blueValue  = (std::sin(currentLoopTime * 2.0f) / 2.0f) + 0.5f;
 
             glUniform4f(location, redValue, greenValue, blueValue, 1.0f);
             ibo.Bind();
@@ -192,7 +185,7 @@ int main()
             // glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
             // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 
-            glBindVertexArray(vao);
+            vao.Bind();
 
             // Rendering commands (Dark Teal Background)
             glClearColor(0.1f, 0.3f, 0.3f, 1.0f);
