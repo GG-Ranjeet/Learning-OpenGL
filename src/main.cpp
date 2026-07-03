@@ -11,6 +11,7 @@
 #include "IndexBuffer.h"
 #include "shader.h"
 #include "VertexBufferLayout.h"
+#include "Texture.h"
 
 int main()
 {
@@ -71,6 +72,9 @@ int main()
         Shader shader("res/shaders/Basic.shader");
         shader.Bind();
         shader.SetUniform4f("u_Color", 0.2f, 0.3f, 0.8f, 1.0f);
+
+        Texture texture("res/textures/awesomeface.png");
+        texture.Bind();
 
         shader.Unbind();
         vao.Unbind();
