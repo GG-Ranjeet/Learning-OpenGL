@@ -51,10 +51,10 @@ int main()
     
     {
         float vertices[] = {
-            -0.5f, -0.5f,
-             0.5f, -0.5f, 
-             0.5f,  0.5f, 
-            -0.5f,  0.5f,
+            -0.5f, -0.5f, 0.0f, 0.0f,
+             0.5f, -0.5f, 1.0f, 0.0f,
+             0.5f,  0.5f, 1.0f, 1.0f,
+            -0.5f,  0.5f, 0.0f, 1.0f
         };
         unsigned int indices[] = {
             0, 1, 2,
@@ -62,7 +62,8 @@ int main()
 
         VertexArray vao;
         VertexBufferLayout layout;
-        layout.Push<float>(2);
+        layout.Push<float>(2); // Position
+        layout.Push<float>(2); // Texture coordinates
         
         VertexBuffer vbo(vertices, sizeof(vertices));
         vao.AddBuffer(vbo, layout);
@@ -71,9 +72,9 @@ int main()
 
         Shader shader("res/shaders/Basic.shader");
         shader.Bind();
-        shader.SetUniform4f("u_Color", 0.2f, 0.3f, 0.8f, 1.0f);
+        // shader.SetUniform4f("u_Color", 0.2f, 0.3f, 0.8f, 1.0f);
 
-        Texture texture("res/textures/awesomeface.png");
+        Texture texture("res/texture/awesomeface.png");
         texture.Bind();
 
         shader.Unbind();
@@ -101,7 +102,9 @@ int main()
             float greenValue = (std::cos(currentLoopTime * 1.5f) / 2.0f) + 0.5f;
             float blueValue  = (std::sin(currentLoopTime * 2.0f) / 2.0f) + 0.5f;
 
-            shader.SetUniform4f("u_Color", redValue, greenValue, blueValue, 1.0f);
+            // shader.SetUniform4f("u_Color", redValue, greenValue, blueValue, 1.0f);
+            shader.SetUniform1i("u_Texture", 0); // Set the texture unit to 0
+
             renderer.Draw(vao, ibo, shader);
             
             glfwSwapBuffers(window);

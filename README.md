@@ -20,18 +20,19 @@ The `VertexArray` binds together the raw data (from the `VertexBuffer`) with the
 ### 3. Shaders
 Shaders are written in a single `.shader` file and parsed dynamically using our custom `ParseShader` function, which splits out the Vertex and Fragment shaders before compiling them.
 
-### 4. The Render Loop (The Draw Call)
+### 4. Textures
+The `Texture` class handles loading image files via `stb_image` and generating OpenGL textures. It encapsulates filtering, wrapping, and binding to texture slots.
+
+### 5. The Render Loop (The Draw Call)
 ```cpp
-glUseProgram(shader);
-vao.Bind();
-ibo.Bind();
-glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+renderer.Draw(vao, ibo, shader);
 ```
-Inside the loop, we simply bind our shader, our VAO, and our IBO. When `glDrawElements` is called, OpenGL uses the bound index buffer to draw the shape using the layout defined in our active VAO!
+Inside the loop, our `Renderer::Draw` function takes the VAO, IBO, and Shader. It automatically binds all three and executes `glDrawElements`. This keeps the main render loop extremely clean!
 
 ## Project Structure
 
-- `src/` - Contains your source files (`main.cpp`, `glad.c`).
+- `src/` - Contains your source files (`main.cpp`, `glad.c`) and custom classes (`Renderer`, `Texture`, etc.).
+- `res/` - Contains project resources such as shaders (`.shader` files) and textures (`.png` files).
 - `include/` - Contains the headers for your dependencies (GLFW, GLAD).
 - `lib/` - Contains the precompiled `.a` library files for GLFW.
 - `.vscode/` - Contains VS Code configuration files:
@@ -51,3 +52,9 @@ This will automatically compile the code using `tasks.json` and launch the windo
 
 - **GLFW 3**: For creating the window and handling input.
 - **GLAD**: For loading OpenGL function pointers.
+- **stb_image**: A single-header library used for loading texture image files (e.g., PNGs).
+
+
+--- 
+
+[Output](./outputs/images/Output%20textures.png)
