@@ -79,16 +79,23 @@ int main()
         // this is the window aspect ratio and if we multiply it with the position matrix, we simply saying scale the position matrix by the aspect ratio of the window.
         glm::mat4 proj = glm::ortho(
             -aspectRatio * scale, 
-            aspectRatio  * scale, 
+            aspectRatio  * scale, // 
             -1.0f * scale, 
-            1.0f  * scale, 
+             1.0f * scale, 
             -1.0f, 1.0f
         ); 
+
+        // translate the view/camera matrix
+        glm::mat4 view(1.0f); 
+        glm::mat4 model(1.0f);
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.0f)); // Move the view matrix to the right and up);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Move the model matrix to the right and up);
+
 
         Shader shader("res/shaders/Basic.shader");
         shader.Bind();
         // shader.SetUniform4f("u_Color", 0.2f, 0.3f, 0.8f, 1.0f);
-        shader.SetUniformMat4f("u_MVP", proj);
+        shader.SetUniformMat4f("u_MVP", model * view * proj);
 
         Texture texture("res/texture/awesome.png");
         texture.Bind();
