@@ -5,8 +5,10 @@ layout(location = 1) in vec2 texCoord;
 
 out vec2 v_TexCoord; 
 
+uniform mat4 u_MVP; // uniform variable for the model-view-projection matrix
+
 void main() {
-    gl_Position = positon;
+    gl_Position = u_MVP * positon;
     v_TexCoord = texCoord; // pass the texture coordinates to the fragment shader after adding texture coordinates
 }
 

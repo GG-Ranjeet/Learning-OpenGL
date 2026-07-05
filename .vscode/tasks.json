@@ -2,6 +2,15 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "Close running OpenGL app",
+            "type": "shell",
+            "command": "try { Stop-Process -Name main -ErrorAction SilentlyContinue } catch {}; exit 0",
+            "presentation": {
+                "reveal": "never",
+                "panel": "shared"
+            }
+        },
+        {
             "type": "cppbuild",
             "label": "Build OpenGL Project",
             "command": "C:\\msys64\\mingw32\\bin\\g++.exe",
@@ -13,6 +22,8 @@
                 "-o",
                 "${workspaceFolder}/main.exe",
                 "-I${workspaceFolder}/include",
+                "-I${workspaceFolder}/src/vendor/glm/",
+                "-I${workspaceFolder}/src/vendor/stb_image/",
                 "-L${workspaceFolder}/lib",
                 "-lglfw3",
                 "-lgdi32",
@@ -28,10 +39,28 @@
                 "$gcc"
             ],
             "group": {
+                "kind": "build"
+            },
+            "dependsOn": [
+                "Close running OpenGL app"
+            ],
+            "detail": "Custom task for compiling OpenGL with GLFW and GLAD"
+        },
+        {
+            "label": "Build & Run OpenGL Project",
+            "type": "shell",
+            "command": "${workspaceFolder}/main.exe",
+            "dependsOn": [
+                "Build OpenGL Project"
+            ],
+            "group": {
                 "kind": "build",
                 "isDefault": true
             },
-            "detail": "Custom task for compiling OpenGL with GLFW and GLAD"
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
         }
     ]
 }

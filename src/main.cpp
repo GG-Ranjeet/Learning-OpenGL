@@ -5,6 +5,8 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
 #include "VertexArray.h"
 #include "Renderer.h"
 #include "VertexBuffer.h"
@@ -28,8 +30,10 @@ int main()
 
     glfwSwapInterval(1); // Enable V-Sync
 
-    // Create a window
-    GLFWwindow *window = glfwCreateWindow(800, 600, "OpenGL Window", NULL, NULL);
+    int width = 800;
+    int height = 600;
+    float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+    GLFWwindow *window = glfwCreateWindow(width, height, "OpenGL Window", NULL, NULL);
     if (window == NULL)
     {
         std::cerr << "Failed to create GLFW window" << std::endl;
@@ -62,19 +66,31 @@ int main()
 
         VertexArray vao;
         VertexBufferLayout layout;
+        VertexBuffer vbo(vertices, sizeof(vertices));
+
         layout.Push<float>(2); // Position
         layout.Push<float>(2); // Texture coordinates
         
-        VertexBuffer vbo(vertices, sizeof(vertices));
         vao.AddBuffer(vbo, layout);
 
         IndexBuffer ibo(indices, sizeof(indices) / sizeof(unsigned int));
 
+        int scale = 1;
+        // this is the window aspect ratio and if we multiply it with the position matrix, we simply saying scale the position matrix by the aspect ratio of the window.
+        glm::mat4 proj = glm::ortho(
+            -aspectRatio * scale, 
+            aspectRatio  * scale, 
+            -1.0f * scale, 
+            1.0f  * scale, 
+            -1.0f, 1.0f
+        ); 
+
         Shader shader("res/shaders/Basic.shader");
         shader.Bind();
         // shader.SetUniform4f("u_Color", 0.2f, 0.3f, 0.8f, 1.0f);
+        shader.SetUniformMat4f("u_MVP", proj);
 
-        Texture texture("res/texture/awesomeface.png");
+        Texture texture("res/texture/awesome.png");
         texture.Bind();
 
         shader.Unbind();
@@ -93,8 +109,9 @@ int main()
             // Input handling
             if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
                 glfwSetWindowShouldClose(window, true);
+
             glClearColor(0.1f, 0.3f, 0.3f, 1.0f);
-            renderer.Clear();          
+            renderer.Clear();
 
             float currentLoopTime = (float)glfwGetTime();
 
