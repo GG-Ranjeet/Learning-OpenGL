@@ -1,3 +1,5 @@
+#include "imgui.h"
+#include "imgui_impl_glfw_gl3.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -28,8 +30,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    glfwSwapInterval(1); // Enable V-Sync
-
+    
     int width = 800;
     int height = 600;
     float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
@@ -41,14 +42,26 @@ int main()
         return -1;
     }
     glfwMakeContextCurrent(window);
+    glfwSwapInterval(1);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cerr << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-    std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
 
+
+    std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
+    // Setup ImGui binding
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+    ImGui_ImplGlfwGL3_Init(window, true);
+
+    // Setup style
+    ImGui::StyleColorsDark();
+    //ImGui::StyleColorsClassic();
     /* 
         Hi
     */
@@ -75,27 +88,15 @@ int main()
 
         IndexBuffer ibo(indices, sizeof(indices) / sizeof(unsigned int));
 
-        int scale = 1;
-        // this is the window aspect ratio and if we multiply it with the position matrix, we simply saying scale the position matrix by the aspect ratio of the window.
-        glm::mat4 proj = glm::ortho(
-            -aspectRatio * scale, 
-            aspectRatio  * scale, // 
-            -1.0f * scale, 
-             1.0f * scale, 
-            -1.0f, 1.0f
-        ); 
+        float projScale = 1;
 
-        // translate the view/camera matrix
         glm::mat4 view(1.0f); 
-        glm::mat4 model(1.0f);
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.0f)); // Move the view matrix to the right and up);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Move the model matrix to the right and up);
-
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.0f));
+        glm::vec3 cameraPos(1.0f, 1.0f, 0.0f);
 
         Shader shader("res/shaders/Basic.shader");
         shader.Bind();
         // shader.SetUniform4f("u_Color", 0.2f, 0.3f, 0.8f, 1.0f);
-        shader.SetUniformMat4f("u_MVP", model * view * proj);
 
         Texture texture("res/texture/awesome.png");
         texture.Bind();
@@ -108,17 +109,65 @@ int main()
         Renderer renderer;
 
         float r = 0.0f;
-        float increment = 0.05f;        
-
+        float increment = 0.05f;   
+        
+        bool show_demo_window = false;
+        bool show_another_window = false;
+        ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);     
+        
         // Render loop
         while (!glfwWindowShouldClose(window))
         {
+            glfwPollEvents();
+            ImGui_ImplGlfwGL3_NewFrame();
+
             // Input handling
             if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
                 glfwSetWindowShouldClose(window, true);
 
+
+            // ImGui debug window
+            {
+                
+                ImGui::Checkbox("Another Window", &show_another_window);
+                ImGui::SameLine();
+                ImGui::Checkbox("Demo Window", &show_demo_window);
+
+                ImGui::SliderFloat("Zoom", &projScale, 1.0f, 10.0f);
+                // ImGui::SliderFloat("Transform", &projScale, 1.0f, 10.0f);
+                ImGui::SliderFloat3("Camera Position", &cameraPos.x, -5.0f, 5.0f);
+
+                ImGui::Text("Object Position: (%.1f, %.1f, %.1f)", cameraPos.x, cameraPos.y, cameraPos.z);
+                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            }
+
+            if (show_another_window)
+            {
+                // ImGui::ShowDemoWindow(&show_demo_window);
+                ImGui::Begin("Another Window", &show_another_window);
+                ImGui::Text("Hello from another window!");
+                if (ImGui::Button("Close Me"))
+                    show_another_window = false;
+                ImGui::End();
+            }
+            if (show_demo_window)
+            {
+                ImGui::ShowDemoWindow(&show_demo_window);
+            }
+            
             glClearColor(0.1f, 0.3f, 0.3f, 1.0f);
             renderer.Clear();
+
+            glm::mat4 proj = glm::ortho(
+                -aspectRatio * projScale, 
+                aspectRatio  * projScale,
+                -1.0f * projScale, 
+                1.0f * projScale, 
+                -1.0f, 1.0f
+            ); 
+
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), cameraPos); 
+            glm::mat4 mvp = proj * view * model; 
 
             float currentLoopTime = (float)glfwGetTime();
 
@@ -126,15 +175,22 @@ int main()
             float greenValue = (std::cos(currentLoopTime * 1.5f) / 2.0f) + 0.5f;
             float blueValue  = (std::sin(currentLoopTime * 2.0f) / 2.0f) + 0.5f;
 
-            // shader.SetUniform4f("u_Color", redValue, greenValue, blueValue, 1.0f);
+            shader.Bind();
             shader.SetUniform1i("u_Texture", 0); // Set the texture unit to 0
+            shader.SetUniformMat4f("u_MVP", mvp);
 
             renderer.Draw(vao, ibo, shader);
             
+            ImGui::Render();
+            ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
             glfwSwapBuffers(window);
             glfwPollEvents();
         }
     }
+    
+    // Cleanup
+    ImGui_ImplGlfwGL3_Shutdown();
+    ImGui::DestroyContext();
     glfwTerminate();
 
     return 0;

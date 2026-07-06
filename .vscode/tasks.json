@@ -11,24 +11,10 @@
             }
         },
         {
-            "type": "cppbuild",
+            "type": "shell",
             "label": "Build OpenGL Project",
-            "command": "C:\\msys64\\mingw32\\bin\\g++.exe",
-            "args": [
-                "-fdiagnostics-color=always",
-                "-g",
-                "${workspaceFolder}/src/*.cpp",
-                "${workspaceFolder}/src/glad.c",
-                "-o",
-                "${workspaceFolder}/main.exe",
-                "-I${workspaceFolder}/include",
-                "-I${workspaceFolder}/src/vendor/glm/",
-                "-I${workspaceFolder}/src/vendor/stb_image/",
-                "-L${workspaceFolder}/lib",
-                "-lglfw3",
-                "-lgdi32",
-                "-lopengl32"
-            ],
+            "command": "C:\\msys64\\mingw32\\bin\\mingw32-make.exe",
+            "args": [],
             "options": {
                 "cwd": "${workspaceFolder}",
                 "env": {
