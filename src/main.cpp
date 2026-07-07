@@ -31,7 +31,6 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    
     int width = 800;
     int height = 600;
     float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
@@ -51,34 +50,50 @@ int main()
         return -1;
     }
 
-
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
-    // Setup ImGui binding
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+    ImGuiIO &io = ImGui::GetIO();
+    (void)io;
     ImGui_ImplGlfwGL3_Init(window, true);
 
-    // Setup style
     ImGui::StyleColorsDark();
-    //ImGui::StyleColorsClassic();
-    /* 
+
+    /*
         Hi
     */
-    
-    { 
+    {
+
         Renderer renderer;
 
-        test::TestClearColor testClearColor;
+        test::Test *currentTest = nullptr;
+        test::TestMenu *testMenu = new test::TestMenu(currentTest);
+        currentTest = testMenu;
+
+        testMenu->RegisterTest<test::TestClearColor>("Clear Color");
 
         while (!glfwWindowShouldClose(window))
         {
             glfwPollEvents();
+            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            renderer.Clear();
+
             ImGui_ImplGlfwGL3_NewFrame();
 
-            testClearColor.OnRender();
-            testClearColor.OnImGuiRender();
+            if (currentTest)
+            {
+                currentTest->OnUpdate(0.0f);
+                currentTest->OnRender();
+                ImGui::Begin("Test");
+                if (currentTest != testMenu && ImGui::Button("<-"))
+                {
+                    // std::cout << "Returning to test menu" << std::endl;
+                    delete currentTest;
+                    currentTest = testMenu;
+                }
+                currentTest->OnImGuiRender();
+                ImGui::End();
+            }
+            
 
             if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
                 glfwSetWindowShouldClose(window, true);
@@ -86,10 +101,16 @@ int main()
             ImGui::Render();
             ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
             glfwSwapBuffers(window);
-            glfwPollEvents();
         }
+
+        // Clean up and terminate
+        delete currentTest
+        if (currentTest != testMenu)
+            delete testMenu;
+        
     }
-    
+
+    //Clean up and terminate 2nd
     ImGui_ImplGlfwGL3_Shutdown();
     ImGui::DestroyContext();
     glfwTerminate();
