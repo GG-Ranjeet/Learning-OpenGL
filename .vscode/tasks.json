@@ -12,15 +12,13 @@
         },
         {
             "type": "shell",
-            "label": "Build OpenGL Project",
-            "command": "C:\\msys64\\mingw32\\bin\\mingw32-make.exe",
-            "args": [],
-            "options": {
-                "cwd": "${workspaceFolder}",
-                "env": {
-                    "PATH": "C:\\msys64\\mingw32\\bin;${env:PATH}"
-                }
-            },
+            "label": "CMake Build Preset Default",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "--preset",
+                "default"
+            ],
             "problemMatcher": [
                 "$gcc"
             ],
@@ -30,14 +28,14 @@
             "dependsOn": [
                 "Close running OpenGL app"
             ],
-            "detail": "Custom task for compiling OpenGL with GLFW and GLAD"
+            "detail": "Nulllll"
         },
         {
-            "label": "Build & Run OpenGL Project",
+            "label": "Run OpenGL Project",
             "type": "shell",
-            "command": "${workspaceFolder}/main.exe",
+            "command": "${workspaceFolder}build/Debug/MeraOpenGL.exe",
             "dependsOn": [
-                "Build OpenGL Project"
+                "CMake Build Preset Default"
             ],
             "group": {
                 "kind": "build",

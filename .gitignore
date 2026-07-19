@@ -2,3 +2,5 @@ src/_yo.cpp
 *.exe
 include/*
 lib/*
+build/*
+*.o

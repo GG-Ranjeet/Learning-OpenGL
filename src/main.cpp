@@ -104,7 +104,7 @@ int main()
         }
 
         // Clean up and terminate
-        delete currentTest
+        delete currentTest;
         if (currentTest != testMenu)
             delete testMenu;
         
